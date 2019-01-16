@@ -15,3 +15,5 @@ https://github.com/dlunion/mtcnn<br>
    cmake ..
    ./DFR
 ```
+## DEMO
+![image](https://github.com/maxuehao/Smokeing-detection/blob/master/demo.png)
