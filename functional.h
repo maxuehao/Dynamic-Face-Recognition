@@ -3,9 +3,16 @@
 
 #include <cmath>
 #include <vector>
-#include <stdio.h>
-
 #include <iostream>
+#include <map>
+
+#include <stdio.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <string.h>
+
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -14,15 +21,14 @@
 #include <time.h>       /* time_t, time, ctime */ 
 
 #include "mtcnn.h"
+#include "feature.h"
 
 #define PI 3.14159265f
 
 
+
 // 夹角余弦
 double cosine(float v1[], float v2[]);
-
-//人脸特征二进制文件比对
-int contrast(std::vector<float> face_feature, cv::Mat *roi);
 
 //人脸模糊度判断
 int blurDetect(cv::Mat srcImage);

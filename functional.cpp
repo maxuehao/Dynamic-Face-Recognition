@@ -22,45 +22,6 @@ double cosine(float v1[], float v2[])
   return cosine;
 }
 
-//二进制人脸识别数据操作
-int contrast(std::vector<float> face_feature, cv::Mat *roi)  
-{  
-    FILE *p = NULL;  
-    int name = 0;
-    p = fopen("feature.bat","a+b");
-    float read_feature[512];
-    float feature[512];
-
-    for(int i=0; i< 512;i++)  
-    {  
-        feature[i] = face_feature[i]; //初始化缓存区  
-    }  
-  
-    int temp = 0;
-	while(!feof(p))
-	{   
-        if (fread(&read_feature,512*sizeof(float),1,p) == 0) break;
-		    float cosin = cosine(feature, read_feature);
-        //std::cout<<cosin<<std::endl;
-		if (cosin > 0.58)
-        {
-            temp = 1;
-            break;
-        }
-        name++;	
-	}
-    if (temp == 0)
-    {
-        fwrite(&feature,512*sizeof(float), 1, p);
-        std::cout<<"---------------"<<std::endl;
-        time_t rawtime;
-        time(&rawtime);  
-        cv::imwrite(std::to_string(rawtime)+".jpg",*roi);
-    }
-    fclose (p);
-    return name;  
-}  
-
 //人脸模糊拉普拉斯判断
 int blurDetect(cv::Mat &srcImage)  
 {  
@@ -131,8 +92,9 @@ int screen(vector<FaceDetector::BoundingBox> res, cv::Mat img, cv::Mat &roi, int
             {
                 //std::cout<<(res[k].points_x[2]-res[k].points_x[0])- (res[k].points_x[1]-res[k].points_x[2])<<std::endl;
                 roi = newIm(cv::Rect((int)(res[k].points_x[0]-(0.7*eye_distance)), (int)(res[k].points_y[0]-(0.7*eye_distance)), (int)(2.4*eye_distance), (int)(2.7*eye_distance)));
+		temp = 1;
                 //人脸模糊判断
-                if (blurdectect(roi) == 0)
+                /*if (blurdectect(roi) == 0)
                 {
                     std::cout<<"####模糊模糊####"<<std::endl;
                     temp = 0;
@@ -140,7 +102,7 @@ int screen(vector<FaceDetector::BoundingBox> res, cv::Mat img, cv::Mat &roi, int
                 else
                 {
                     temp = 1;
-                }
+                }*/
             }
         }
     }

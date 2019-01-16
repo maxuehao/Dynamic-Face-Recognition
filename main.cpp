@@ -1,130 +1,121 @@
-#include "mtcnn.h"
-#include "feature.h"
 #include "functional.h"
- 
 
+using namespace std;
 
+int main() {
 
-
-int main(int argc, char **argv) {
     //加载mtcnn检测模型
-    FaceDetector fd("model", FaceDetector::MODEL_V1);
+    FaceDetector fd("../model", FaceDetector::MODEL_V1);
     //加载人脸识别特征提取模型
-    string model_file   = "model/deploy.prototxt";
-    string trained_file = "model/face.caffemodel";
-    Classifier classifier(model_file, trained_file);
+    Classifier classifier("../model/deploy.prototxt", "../model/face.caffemodel");
 
+    //计算face id文件夹下人脸图片的特征并存入map结构里
+    //存放人脸对比图片的文件夹
+    char *dir_name= "../face_id/";
+    map<string, vector<float>> face_id;
+    // check the parameter !
+	if( NULL == dir_name )
+	{
+		cout<<" dir_name is null ! "<<endl;
+	}
+ 
+	// check if dir_name is a valid dir
+	struct stat s;
+	lstat( dir_name , &s );
+	if( ! S_ISDIR( s.st_mode ) )
+	{
+		cout<<"dir_name is not a valid directory !"<<endl;
+	}
+	
+	struct dirent * filename;    // return value for readdir()
+ 	DIR * dir;                   // return value for opendir()
+	dir = opendir( dir_name );
+	if( NULL == dir )
+	{
+		cout<<"Can not open dir "<<dir_name<<endl;
+	}
+	/* read all the files in the dir ~ */
+	while( ( filename = readdir(dir) ) != NULL )
+	{
+		// get rid of "." and ".."
+		if( strcmp( filename->d_name , "." ) == 0 || 
+			strcmp( filename->d_name , "..") == 0    )
+			continue;
+        char *name = (char *) malloc(100 * sizeof(char));
+        strcpy(name, dir_name);
+        strcat(name, filename ->d_name);
+        printf("%s\n", name);
+        cv::Mat img;
+        img = cv::imread(name);
+        string face_name = filename ->d_name;
+        vector<float> predictions = classifier.Classify(img);
+        face_id.insert(pair<string, vector<float>>(face_name, predictions));    
+        free(name);
+	}
+
+    //定义CV摄像头参数
     int frame_num = 0;
-    //判断缓冲区是否写入信息
-    int temp = 0;
-    int id = 0;
-    //创建缓冲数组储存前一帧检测框信息
-    float buf[100][5];
-    //记录缓冲区长度
-    int buf_num;
-
     cv::VideoCapture cap(0); 
-    cap.set(CV_CAP_PROP_FRAME_WIDTH, 1280);  
-    cap.set(CV_CAP_PROP_FRAME_HEIGHT, 720);  
+    cap.set(CV_CAP_PROP_FRAME_WIDTH, 1920);  
+    cap.set(CV_CAP_PROP_FRAME_HEIGHT, 1080);  
     cv::Mat frameImg;
+
+    //人脸比对相似度阈值
+    float face_confidence = 0.58;
 
     while(true)
     {
         cap >> frameImg;
-        cv::Mat testImg = frameImg(cv::Rect(30,260,1240,400));
+        cv::Mat testImg = frameImg;
         cv::Mat img=testImg.clone();
-        //cout << "h" << testImg.rows << endl;
-        //cout << "w" << testImg.cols << endl;
-        vector<FaceDetector::BoundingBox> res = fd.Detect(testImg, FaceDetector::BGR, FaceDetector::ORIENT_UP ,140, 0.8, 0.9, 0.95);
+        //调用Mtcnn人脸检测端口,70为所检测人脸最小尺寸
+        vector<FaceDetector::BoundingBox> res = fd.Detect(testImg, FaceDetector::BGR, FaceDetector::ORIENT_UP ,70, 0.8, 0.9, 0.95);
         cout<< "FPS NUM:" << frame_num << endl;
         cout<< "Detected face NUM : " << res.size() << endl;
+
         if (res.size()!= 0)
         {   
-            //初始化缓冲区
-            if (temp ==0)
-            {
-                for(int k = 0; k < res.size(); k++)
-                {
-                    buf[k][0] = res[k].x1;
-                    buf[k][1] = res[k].y1;
-                    buf[k][2] = res[k].x2;
-                    buf[k][3] = res[k].y2;
-                    buf[k][4] = id;
-                    id++;
-                } 
-                cout<<"################ First uodat！！！#################"<<endl;
-                //cout<<buf[0][0]<<endl;
-                buf_num = res.size();
-                temp = 1;
-                frame_num++;
-                continue;
-            }
-            //cout<<buf_num<<endl;
-            //创建更新缓冲区所用的交换数组
-            float swap_buf [res.size()][5];
             for(int k = 0; k < res.size(); k++)
             {
-                int id_name;
-                int iou_sig = 0;
-
-                int bbox1[4] = {(int)res[k].x1,(int)res[k].y1, (int)res[k].x2, (int)res[k].y2};
-                //计算检测框与缓冲区框的IOU
-                for(int j =0; j < buf_num; j++)
-                {
-                    int bbox2[4] = {(int)buf[j][0], (int)buf[j][1], (int)buf[j][2], (int)buf[j][3]};
-                    float con = iou(bbox1, bbox2);
-                    //cout<<"IOU:"<<con<<endl;
-                    if(con>0.1)
-                    {           
-                        //绑定相同ID             
-                        id_name = buf[j][4];
-                        iou_sig = 1;
-                    }  
-                }
-                if (iou_sig == 0)
-                {
-                    id_name = id++;
-                }
-                //写入交换数组
-                swap_buf[k][0] = res[k].x1;
-                swap_buf[k][1] = res[k].y1;
-                swap_buf[k][2] = res[k].x2;
-                swap_buf[k][3] = res[k].y2;
-                swap_buf[k][4] = id_name;
-
-                //std::string text = "ID:" + std::to_string(id_name);
-                //cv::Point p = cv::Point(res[k].x1, res[k].y1);
-                //cv::putText(testImg, text, p, cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar(0, 255, 0), 2, CV_AA);
-
-                cv::rectangle(testImg, cv::Point(res[k].x1, res[k].y1), cv::Point(res[k].x2, res[k].y2), cv::Scalar(255, 0, 0), 2);
+                //绘制人脸检测框
+                cv::rectangle(testImg, cv::Point(res[k].x1, res[k].y1), cv::Point(res[k].x2, res[k].y2), cv::Scalar(255, 255, 0), 3);
+                //绘制人脸关键点
                 for (int i = 0; i < 5; i++)
                 {
                     cv::circle(testImg, cv::Point(res[k].points_x[i], res[k].points_y[i]), 1, cv::Scalar(0, 0, 255), 2);
                 }
                 cv::Mat roi;
+                //人脸质量筛选
                 int signal = screen(res, img, roi, k);
                 if (signal == 0) continue;
-                std::vector<float> predictions = classifier.Classify(roi);
-                //人脸识别比对
-                int name = contrast(predictions, &roi);
-                //std::cout <<name<< std::endl;
-                
+                //输出512维度人脸特征向量
+                vector<float> predictions = classifier.Classify(roi);
+                map<string, vector<float>>::iterator iter; 
+                string name; 
+                for(iter = face_id.begin(); iter != face_id.end(); iter++){
+                    float feature_1[512], feature_2[512];
+                    for(int i=0; i< 512;i++)  
+                    {  
+                        feature_1[i] = predictions[i]; 
+                        feature_2[i] = iter->second[i];
+                    } 
+                    float cosin = cosine(feature_1, feature_2);
+                    //printf("cosin:%f\n",cosin);
+                    //
+                    if(cosin >= face_confidence){
+                        name = iter->first;
+                    }
+                    else{
+                        name = "None";
+                    }
+
+
+                }  
                 //人脸ID打印
-                std::string text = "ID:" + std::to_string(name);
+                string text = "ID:" + name;
                 cv::Point p = cv::Point(res[k].x1, res[k].y1-5);
                 cv::putText(testImg, text, p, cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar(0, 255, 0), 2, CV_AA);
-
             }
-            //将交换数组信息写入缓冲区更新
-            for(int k = 0; k < res.size(); k++)
-            {
-                buf[k][0] = swap_buf[k][0];
-                buf[k][1] = swap_buf[k][1];
-                buf[k][2] = swap_buf[k][2];
-                buf[k][3] = swap_buf[k][3];
-                buf[k][4] = swap_buf[k][4];
-            }
-            buf_num = res.size();
         }
         cv::imshow("test", testImg);
         frame_num++;

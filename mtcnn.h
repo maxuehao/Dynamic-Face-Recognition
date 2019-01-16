@@ -26,7 +26,7 @@ using std::cout;
 using std::endl;
 using std::sort;
 
-#define CPU_ONLY
+#define GPU_ONLY
 
 class FaceDetector {
 public:
