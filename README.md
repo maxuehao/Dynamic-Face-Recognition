@@ -5,7 +5,7 @@ Deep learning,Face recognition algorithm based on Mobilenet and Mtcnn(LFW 95%, M
 https://github.com/ydwen/caffe-face<br>
 
 ## Environmental requirements
-  1.Caffe<br>2.OpenCV3.x<br>
+  1.Caffe<br>2.OpenCV 3.x<br>
   
 ## Instructions for use
 
