@@ -9,8 +9,8 @@ https://github.com/dlunion/mtcnn<br>
   1.Caffe<br>2.OpenCV 3.x<br>
   
 ## Instructions for use
-
-### Next
-```
-  python demo_autokeras.py
+1.Please clip and align the face images that need to be compared and put them in the face_id folder  
+```mkdir build
+   cmake ..
+   ./DFR
 ```
