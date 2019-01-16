@@ -16,4 +16,4 @@ https://github.com/dlunion/mtcnn<br>
    ./DFR
 ```
 ## DEMO
-![image](https://github.com/maxuehao/Smokeing-detection/blob/master/demo.png)
+![image](https://github.com/maxuehao/Dynamic-Face-Recognition/blob/master/demo.png)
