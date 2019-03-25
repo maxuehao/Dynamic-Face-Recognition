@@ -19,7 +19,9 @@ https://github.com/dlunion/mtcnn<br>
 ## Instructions for use
 1.Please clip and align the face images that need to be compared and put them in the face_id folder  
 ```
+   cd Dynamic-Face-Recognition
    mkdir build
+   cd build
    cmake ..
    ./DFR
 ```
