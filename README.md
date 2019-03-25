@@ -7,11 +7,14 @@ https://github.com/dlunion/mtcnn<br>
 
 ## Environmental requirements
   1.Caffe(Be based on CUDA&Cudnn)<br>2.OpenCV 3.x<br>3.Cmake<br>
-  2.~/.bashrc
+
+## Caffe environment variable setting
+  1.Add to 
   ```
     export PYTHONPATH=/home/pv/ma/caffe-master/python:$PYTHONPATH
     export CAFFE_ROOT=/home/pv/ma/caffe-master
   ```
+   ~/.bashrc
   
 ## Instructions for use
 1.Please clip and align the face images that need to be compared and put them in the face_id folder  
