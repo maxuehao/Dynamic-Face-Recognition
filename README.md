@@ -6,7 +6,7 @@ https://github.com/ydwen/caffe-face<br>
 https://github.com/dlunion/mtcnn<br>
 
 ## Environmental requirements
-  1.Caffe(Be based on CUDA&Cudnn)<br>2.OpenCV 3.x<br>3.Cmake
+  1.Caffe(Be based on CUDA&Cudnn)<br>2.OpenCV 3.x<br>3.Cmake<br>
   2.~/.bashrc
   ```
     export PYTHONPATH=/home/pv/ma/caffe-master/python:$PYTHONPATH
