@@ -61,7 +61,7 @@ int main() {
     cv::Mat frameImg;
 
     //人脸比对相似度阈值
-    float face_confidence = 0.58;
+    float face_confidence = 0.8;
 
     while(true)
     {
@@ -88,10 +88,12 @@ int main() {
                 //人脸质量筛选
                 int signal = screen(res, img, roi, k);
                 if (signal == 0) continue;
+                //cv::imwrite("1.jpg",roi);
                 //输出512维度人脸特征向量
                 vector<float> predictions = classifier.Classify(roi);
                 map<string, vector<float>>::iterator iter; 
                 string name; 
+                float score;
                 for(iter = face_id.begin(); iter != face_id.end(); iter++){
                     float feature_1[512], feature_2[512];
                     for(int i=0; i< 512;i++)  
@@ -100,12 +102,14 @@ int main() {
                         feature_2[i] = iter->second[i];
                     } 
                     float cosin = cosine(feature_1, feature_2);
-                    //printf("cosin:%f\n",cosin);
-                    //
                     if(cosin >= face_confidence){
                         name = iter->first;
+                        score = cosin;
+                        printf("cosin:%f\n",cosin);
+                        break;
                     }
                     else{
+                        score = 0;
                         name = "None";
                     }
 
@@ -115,6 +119,11 @@ int main() {
                 string text = "ID:" + name;
                 cv::Point p = cv::Point(res[k].x1, res[k].y1-5);
                 cv::putText(testImg, text, p, cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar(0, 255, 0), 2, CV_AA);
+                //置信度打印
+                string str_score =to_string(score);
+                string score_text = "Score:" + str_score;
+                cv::Point z = cv::Point(res[k].x1, res[k].y1-25);
+                cv::putText(testImg, score_text, z, cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar(0, 0, 255), 2, CV_AA);
             }
         }
         cv::imshow("test", testImg);
