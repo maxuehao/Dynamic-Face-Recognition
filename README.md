@@ -17,7 +17,8 @@ https://github.com/dlunion/mtcnn<br>
   to ~/.bashrc
   
 ## Instructions for use
-1.Please clip and align the face images that need to be compared and put them in the face_id folder  
+1.Please clip and align the face images that need to be compared and put them in the face_id folder<br>
+2.
 ```
    cd Dynamic-Face-Recognition
    mkdir build
